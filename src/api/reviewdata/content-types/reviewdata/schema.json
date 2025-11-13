@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "reviewdatas",
+  "info": {
+    "singularName": "reviewdata",
+    "pluralName": "reviewdatas",
+    "displayName": "reviewdata"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Name": {
+      "type": "string"
+    },
+    "Rating": {
+      "type": "decimal"
+    },
+    "Comment": {
+      "type": "text"
+    },
+    "Image_url": {
+      "type": "string"
+    },
+    "GoogleReviewsUrl": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "client_successes",
+  "info": {
+    "singularName": "client-success",
+    "pluralName": "client-successes",
+    "displayName": "Client-Success"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Item_no": {
+      "type": "integer"
+    },
+    "Image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "Location": {
+      "type": "string"
+    },
+    "Bidding": {
+      "type": "string"
+    },
+    "Auction": {
+      "type": "string"
+    },
+    "Size": {
+      "type": "string"
+    }
+  }
+}

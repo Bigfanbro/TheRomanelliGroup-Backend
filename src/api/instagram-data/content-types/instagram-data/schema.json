@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "instagram_datas",
+  "info": {
+    "singularName": "instagram-data",
+    "pluralName": "instagram-datas",
+    "displayName": "InstagramData"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Description": {
+      "type": "text"
+    },
+    "Timing": {
+      "type": "string"
+    },
+    "ImageUrl": {
+      "type": "string"
+    },
+    "InstagramLinkUrl": {
+      "type": "string"
+    }
+  }
+}
