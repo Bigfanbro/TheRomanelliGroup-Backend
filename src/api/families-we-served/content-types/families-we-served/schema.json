@@ -11,14 +11,21 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "Image_url": {
-      "type": "string"
-    },
     "Title": {
       "type": "text"
     },
     "Name": {
       "type": "string"
+    },
+    "Image_url": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
     }
   }
 }

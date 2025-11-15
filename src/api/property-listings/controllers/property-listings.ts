@@ -60,11 +60,11 @@ export default {
       }
 
       if (bedrooms) {
-        filters.push(`BedroomsTotal ge ${bedrooms}`);
+        filters.push(`BedroomsTotal eq ${bedrooms}`);
       }
 
       if (bathrooms) {
-        filters.push(`BathroomsTotalInteger ge ${bathrooms}`);
+        filters.push(`BathroomsTotalInteger eq ${bathrooms}`);
       }
 
       let url = baseUrl;
