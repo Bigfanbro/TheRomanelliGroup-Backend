@@ -11,7 +11,13 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "Image_url": {
+    "Title": {
+      "type": "text"
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Image": {
       "type": "media",
       "multiple": false,
       "allowedTypes": [
@@ -20,12 +26,6 @@
         "videos",
         "audios"
       ]
-    },
-    "Title": {
-      "type": "text"
-    },
-    "Name": {
-      "type": "string"
     }
   }
 }
