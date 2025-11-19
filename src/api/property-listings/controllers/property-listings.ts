@@ -18,9 +18,13 @@ export default {
 
   async filter(ctx: Context) {
     try {
-      const { city, min, max, bedrooms, bathrooms, property, listingType } = ctx.query;
+      const { city, min, max, bedrooms, bathrooms, property, listingType, Bedrooms, Bathrooms } = ctx.query;
+      
+      // Use the correct parameter names (handle both cases)
+      const bedroomParam = bedrooms || Bedrooms;
+      const bathroomParam = bathrooms || Bathrooms;
 
-      let baseUrl = `https://replication.sparkapi.com/Version/3/Reso/OData/Property?$orderby=ModificationTimestamp%20desc&$top=100&$expand=Media`;
+      let baseUrl = `https://replication.sparkapi.com/Version/3/Reso/OData/Property?$orderby=ModificationTimestamp%20desc&$top=300&$expand=Media`;
       let filters = [];
 
       if (city) {
@@ -59,12 +63,12 @@ export default {
         filters.push(`ListPrice le ${max}`);
       }
 
-      if (bedrooms) {
-        filters.push(`BedroomsTotal eq ${bedrooms}`);
+      if (bedroomParam) {
+        filters.push(`BedroomsTotal eq ${bedroomParam}`);
       }
 
-      if (bathrooms) {
-        filters.push(`BathroomsTotalInteger eq ${bathrooms}`);
+      if (bathroomParam) {
+        filters.push(`BathroomsTotalInteger eq ${bathroomParam}`);
       }
 
       let url = baseUrl;
@@ -79,12 +83,27 @@ export default {
           "Accept": "application/json",
         },
       });
+      
 
       if (!response.ok) {
         throw new Error(`Spark API error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as any;
+      
+      if (data.value) {
+        
+        if (bedroomParam) {
+          const bedroomNum = parseInt(bedroomParam as string);
+          data.value = data.value.filter((item: any) => item.BedroomsTotal === bedroomNum);
+        }
+        
+        if (bathroomParam) {
+          const bathroomNum = parseInt(bathroomParam as string);
+          data.value = data.value.filter((item: any) => item.BathroomsTotalInteger === bathroomNum);
+        }
+      }
+      
       ctx.body = data;
 
     } catch (err) {
