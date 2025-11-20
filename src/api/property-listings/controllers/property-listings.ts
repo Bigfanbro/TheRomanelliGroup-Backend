@@ -18,8 +18,9 @@ export default {
 
   async filter(ctx: Context) {
     try {
-      const { city, min, max, bedrooms, bathrooms, property, listingType, Bedrooms, Bathrooms } = ctx.query;
-      
+      const { city,         // "Dublin"
+      state,        // "OH"
+      country, min, max, bedrooms, bathrooms, property, listingType, Bedrooms, Bathrooms } = ctx.query;
       // Use the correct parameter names (handle both cases)
       const bedroomParam = bedrooms || Bedrooms;
       const bathroomParam = bathrooms || Bathrooms;
@@ -27,9 +28,10 @@ export default {
       let baseUrl = `https://replication.sparkapi.com/Version/3/Reso/OData/Property?$orderby=ModificationTimestamp desc&$top=300&$expand=Media`;
       let filters = [];
 
-      if (city) {
-        filters.push(`City eq '${encodeURIComponent(city as string)}'`);
-      }
+      if (city) filters.push(`City eq '${city}'`);
+      if (state) filters.push(`StateOrProvince eq '${state}'`);
+      if (country) filters.push(`Country eq '${country}'`);
+
 
       if (property) {
         filters.push(`PropertyType eq '${encodeURIComponent(property as string)}'`);
