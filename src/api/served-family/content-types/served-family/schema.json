@@ -1,10 +1,10 @@
 {
   "kind": "collectionType",
-  "collectionName": "families_we_serveds",
+  "collectionName": "served_families",
   "info": {
-    "singularName": "families-we-served",
-    "pluralName": "families-we-serveds",
-    "displayName": "FamiliesWeServed "
+    "singularName": "served-family",
+    "pluralName": "served-families",
+    "displayName": "served-family"
   },
   "options": {
     "draftAndPublish": true

@@ -436,37 +436,6 @@ export interface ApiClientSuccessClientSuccess
   };
 }
 
-export interface ApiFamiliesWeServedFamiliesWeServed
-  extends Struct.CollectionTypeSchema {
-  collectionName: 'families_we_serveds';
-  info: {
-    displayName: 'FamiliesWeServed ';
-    pluralName: 'families-we-serveds';
-    singularName: 'families-we-served';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    Image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::families-we-served.families-we-served'
-    > &
-      Schema.Attribute.Private;
-    Name: Schema.Attribute.String;
-    publishedAt: Schema.Attribute.DateTime;
-    Title: Schema.Attribute.Text;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-  };
-}
-
 export interface ApiInstagramDataInstagramData
   extends Struct.CollectionTypeSchema {
   collectionName: 'instagram_datas';
@@ -525,6 +494,37 @@ export interface ApiReviewdataReviewdata extends Struct.CollectionTypeSchema {
     Name: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     Rating: Schema.Attribute.Decimal;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiServedFamilyServedFamily
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'served_families';
+  info: {
+    displayName: 'served-family';
+    pluralName: 'served-families';
+    singularName: 'served-family';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    Image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::served-family.served-family'
+    > &
+      Schema.Attribute.Private;
+    Name: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    Title: Schema.Attribute.Text;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1042,9 +1042,9 @@ declare module '@strapi/strapi' {
       'admin::user': AdminUser;
       'api::blog.blog': ApiBlogBlog;
       'api::client-success.client-success': ApiClientSuccessClientSuccess;
-      'api::families-we-served.families-we-served': ApiFamiliesWeServedFamiliesWeServed;
       'api::instagram-data.instagram-data': ApiInstagramDataInstagramData;
       'api::reviewdata.reviewdata': ApiReviewdataReviewdata;
+      'api::served-family.served-family': ApiServedFamilyServedFamily;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
