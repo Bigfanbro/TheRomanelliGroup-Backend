@@ -20,10 +20,15 @@ export default {
     try {
       const { city,         // "Dublin"
       state,        // "OH"
-      country, min, max, bedrooms, bathrooms, property, listingType, Bedrooms, Bathrooms } = ctx.query;
+      country, min, max, bedrooms, bathrooms, property, listingType, Bedrooms, Bathrooms , street,         // NEW
+      streetNumber,   // NEW
+      postalCode,     // NEW
+      zip,            // alias
+      address          } = ctx.query;
       // Use the correct parameter names (handle both cases)
       const bedroomParam = bedrooms || Bedrooms;
       const bathroomParam = bathrooms || Bathrooms;
+      const zipParam = postalCode || zip;
 
       let baseUrl = `https://replication.sparkapi.com/Version/3/Reso/OData/Property?$orderby=ModificationTimestamp desc&$top=300&$expand=Media`;
       let filters = [];
@@ -72,6 +77,33 @@ export default {
       if (bathroomParam) {
         filters.push(`BathroomsTotalInteger eq ${bathroomParam}`);
       }
+       // 1) Street name partial
+    if (street) {
+      filters.push(`startswith(StreetName, '${street}')`);
+    }
+
+    // 2) Street number (safe cast because many MLS store it as numeric)
+    if (streetNumber) {
+      filters.push(`startswith(StreetNumber, '${streetNumber}')`);
+    }
+
+    // 3) PostalCode / ZIP
+    if (zipParam) {
+      filters.push(`startswith(PostalCode, '${zipParam}')`);
+    }
+
+    // 4) Full "address" search (safe: Spark allows startswith(), NOT contains)
+    if (address) {
+      const a = address;
+      filters.push(
+        `(startswith(StreetName, '${a}') or ` +
+        `startswith(cast(StreetNumber, 'Edm.String'), '${a}') or ` +
+        `startswith(StreetDirPrefix, '${a}') or ` +
+        `startswith(StreetSuffix, '${a}') or ` +
+        `startswith(UnparsedAddress, '${a}') or ` +
+        `startswith(PostalCode, '${a}'))`
+      );
+    }
 
       let url = baseUrl;
       if (filters.length > 0) {
