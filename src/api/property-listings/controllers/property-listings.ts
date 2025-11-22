@@ -33,13 +33,16 @@ export default {
       let baseUrl = `https://replication.sparkapi.com/Version/3/Reso/OData/Property?$orderby=ModificationTimestamp desc&$top=300&$expand=Media`;
       let filters = [];
 
-      if (city) filters.push(`City eq '${city}'`);
-      if (state) filters.push(`StateOrProvince eq '${state}'`);
-      if (country) filters.push(`Country eq '${country}'`);
+      if (city) {
+        const cityName = decodeURIComponent(city as string).replace(/'/g, "''");
+        filters.push(`(startswith(City, '${cityName}') or startswith(City, '${cityName.toUpperCase()}') or City eq '${cityName}')`);
+      }
+      if (state) filters.push(`StateOrProvince eq '${decodeURIComponent(state as string).replace(/'/g, "''")}'`);
+      if (country) filters.push(`Country eq '${decodeURIComponent(country as string).replace(/'/g, "''")}'`);
 
 
       if (property) {
-        filters.push(`PropertyType eq '${encodeURIComponent(property as string)}'`);
+        filters.push(`PropertyType eq '${decodeURIComponent(property as string).replace(/'/g, "''")}'`);
       } else if (listingType) {
         let typeFilters = [];
         if (listingType === "Buy") {
@@ -110,7 +113,6 @@ export default {
         const filterString = filters.join(' and ');
         url += `&$filter=${encodeURIComponent(filterString)}`;
       }
-
       const response = await fetch(url, {
         headers: {
           "Authorization": `Bearer ${process.env.SPARK_API_KEY}`,
@@ -124,6 +126,15 @@ export default {
       }
 
       const data = await response.json() as any;
+      
+      // Log sample locations to see what's available
+      if (data.value?.length > 0) {
+        const sampleLocations = data.value.slice(0, 5).map(item => ({
+          city: item.City,
+          state: item.StateOrProvince,
+          country: item.Country
+        }));
+      }
       
       if (data.value) {
         
