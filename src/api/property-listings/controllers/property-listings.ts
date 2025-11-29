@@ -24,7 +24,7 @@ export default {
       streetNumber,   // NEW
       postalCode,     // NEW
       zip,            // alias
-      address          } = ctx.query;
+      address     ,sqftMin, sqftMax     } = ctx.query;
       // Use the correct parameter names (handle both cases)
       const bedroomParam = bedrooms || Bedrooms;
       const bathroomParam = bathrooms || Bathrooms;
@@ -72,6 +72,15 @@ export default {
       } else if (max) {
         filters.push(`ListPrice le ${max}`);
       }
+      // SqFt filtering
+if (sqftMin && sqftMax) {
+  filters.push(`BuildingAreaTotal ge ${sqftMin} and BuildingAreaTotal le ${sqftMax}`);
+} else if (sqftMin) {
+  filters.push(`BuildingAreaTotal ge ${sqftMin}`);
+} else if (sqftMax) {
+  filters.push(`BuildingAreaTotal le ${sqftMax}`);
+}
+
 
       if (bedroomParam) {
         filters.push(`BedroomsTotal eq ${bedroomParam}`);
