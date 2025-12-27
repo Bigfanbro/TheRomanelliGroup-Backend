@@ -1,16 +1,64 @@
 import { Context } from "koa";
 
 export default {
-  async listings(ctx: Context) {
+ async listings(ctx: Context) {
     try {
-      const response = await fetch(`https://replication.sparkapi.com/Version/3/Reso/OData/Property?$filter=PropertyType eq 'Residential' or PropertyType eq 'Residential Income' or PropertyType eq 'Land' or PropertyType eq 'Commercial Sale' or PropertyType eq 'Farm' or PropertyType eq 'Multi-Family'&$orderby=ModificationTimestamp desc&$top=18&$expand=Media`, {
+      const allowedLocations = [
+        "Westerville",
+        "Dublin",
+        "Powell",
+        "Gahanna",
+        "New Albany",
+        "Galena",
+        "Sunbury",
+        "Upper Arlington",
+        "Worthington",
+        "Bexley",
+        "Hilliard",
+        "Short North",
+        "German Village",
+        "Merion Village",
+        "Clintonville"
+      ];
+
+      const locationFilter = allowedLocations
+        .map(city => `City eq '${city}'`)
+        .join(" or ");
+
+      const propertyTypeFilter = [
+        "Residential",
+        "Residential Income",
+        "Land",
+        "Commercial Sale",
+        "Farm",
+        "Multi-Family"
+      ].map(type => `PropertyType eq '${type}'`).join(" or ");
+
+      const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
+
+      const url =
+        `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
+        `?$filter=${encodeURIComponent(filter)}` +
+        `&$orderby=ModificationTimestamp desc` +
+        `&$top=30` +
+        `&$expand=Media`;
+
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
-        },
+          Accept: "application/json"
+        }
       });
+
+      if (!response.ok) {
+        throw new Error(`Spark API error ${response.status}`);
+      }
+
       const data = await response.json();
       ctx.body = data;
+
     } catch (error) {
+      console.error("❌ Spark listings error:", error.message);
       ctx.status = 500;
       ctx.body = { error: "Failed to fetch listings" };
     }
@@ -24,7 +72,7 @@ export default {
       streetNumber,   // NEW
       postalCode,     // NEW
       zip,            // alias
-      address     ,sqftMin, sqftMax     } = ctx.query;
+      address     ,sqftMin, sqftMax , unparsedAddress    } = ctx.query;
       // Use the correct parameter names (handle both cases)
       const bedroomParam = bedrooms || Bedrooms;
       const bathroomParam = bathrooms || Bathrooms;
@@ -40,7 +88,10 @@ export default {
       if (state) filters.push(`StateOrProvince eq '${decodeURIComponent(state as string).replace(/'/g, "''")}'`);
       if (country) filters.push(`Country eq '${decodeURIComponent(country as string).replace(/'/g, "''")}'`);
 
-
+      if( unparsedAddress) {
+        const addr = decodeURIComponent(unparsedAddress as string).replace(/'/g, "''");
+        filters.push(`startswith(UnparsedAddress, '${addr}')`);
+      }
       if (property) {
         filters.push(`PropertyType eq '${decodeURIComponent(property as string).replace(/'/g, "''")}'`);
       } else if (listingType) {
