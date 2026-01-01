@@ -66,13 +66,41 @@ export default {
 
   async filter(ctx: Context) {
     try {
-      const { city,         // "Dublin"
-      state,        // "OH"
-      country, min, max, bedrooms, bathrooms, property, listingType, Bedrooms, Bathrooms , street,         // NEW
-      streetNumber,   // NEW
-      postalCode,     // NEW
-      zip,            // alias
-      address     ,sqftMin, sqftMax , unparsedAddress    } = ctx.query;
+      // Validate API key
+      if (!process.env.SPARK_API_KEY) {
+        throw new Error('SPARK_API_KEY environment variable is not configured');
+      }
+
+      const {
+        city,
+        state,
+        country,
+        min,
+        max,
+        bedrooms,
+        bathrooms,
+        property,
+        listingType,
+        Bedrooms,
+        Bathrooms,
+        street,
+        streetNumber,
+        postalCode,
+        zip,
+        address,
+        sqftMin,
+        sqftMax,
+        unparsedAddress
+      } = ctx.query;
+
+      // Sanitize function for OData values
+      const sanitizeODataValue = (value: string): string => {
+        return value
+          .replace(/'/g, "''")
+          .replace(/[()]/g, '') // Remove parentheses
+          .replace(/\s+(and|or)\s+/gi, ' ') // Remove SQL operators
+          .trim();
+      };
       // Use the correct parameter names (handle both cases)
       const bedroomParam = bedrooms || Bedrooms;
       const bathroomParam = bathrooms || Bathrooms;
@@ -82,14 +110,20 @@ export default {
       let filters = [];
 
       if (city) {
-        const cityName = decodeURIComponent(city as string).replace(/'/g, "''");
+        const cityName = sanitizeODataValue(decodeURIComponent(city as string));
         filters.push(`(startswith(City, '${cityName}') or startswith(City, '${cityName.toUpperCase()}') or City eq '${cityName}')`);
       }
-      if (state) filters.push(`StateOrProvince eq '${decodeURIComponent(state as string).replace(/'/g, "''")}'`);
-      if (country) filters.push(`Country eq '${decodeURIComponent(country as string).replace(/'/g, "''")}'`);
+      if (state) {
+        const stateName = sanitizeODataValue(decodeURIComponent(state as string));
+        filters.push(`StateOrProvince eq '${stateName}'`);
+      }
+      if (country) {
+        const countryName = sanitizeODataValue(decodeURIComponent(country as string));
+        filters.push(`Country eq '${countryName}'`);
+      }
 
-      if( unparsedAddress) {
-        const addr = decodeURIComponent(unparsedAddress as string).replace(/'/g, "''");
+      if (unparsedAddress) {
+        const addr = sanitizeODataValue(decodeURIComponent(unparsedAddress as string));
         filters.push(`startswith(UnparsedAddress, '${addr}')`);
       }
       if (property) {
@@ -116,57 +150,51 @@ export default {
         }
       }
 
-      if (min && max) {
-        filters.push(`ListPrice ge ${min} and ListPrice le ${max}`);
-      } else if (min) {
+      // Sanitize numeric parameters
+      if (min && /^\d+(\.\d+)?$/.test(min as string)) {
         filters.push(`ListPrice ge ${min}`);
-      } else if (max) {
+      }
+      if (max && /^\d+(\.\d+)?$/.test(max as string)) {
         filters.push(`ListPrice le ${max}`);
       }
-      // SqFt filtering
-if (sqftMin && sqftMax) {
-  filters.push(`BuildingAreaTotal ge ${sqftMin} and BuildingAreaTotal le ${sqftMax}`);
-} else if (sqftMin) {
-  filters.push(`BuildingAreaTotal ge ${sqftMin}`);
-} else if (sqftMax) {
-  filters.push(`BuildingAreaTotal le ${sqftMax}`);
-}
-
-
-      if (bedroomParam) {
+      if (sqftMin && /^\d+(\.\d+)?$/.test(sqftMin as string)) {
+        filters.push(`BuildingAreaTotal ge ${sqftMin}`);
+      }
+      if (sqftMax && /^\d+(\.\d+)?$/.test(sqftMax as string)) {
+        filters.push(`BuildingAreaTotal le ${sqftMax}`);
+      }
+      if (bedroomParam && /^\d+$/.test(bedroomParam as string)) {
         filters.push(`BedroomsTotal eq ${bedroomParam}`);
       }
-
-      if (bathroomParam) {
+      if (bathroomParam && /^\d+$/.test(bathroomParam as string)) {
         filters.push(`BathroomsTotalInteger eq ${bathroomParam}`);
       }
-       // 1) Street name partial
-    if (street) {
-      filters.push(`startswith(StreetName, '${street}')`);
-    }
+      if (street) {
+        const streetName = sanitizeODataValue(decodeURIComponent(street as string));
+        filters.push(`startswith(StreetName, '${streetName}')`);
+      }
 
-    // 2) Street number (safe cast because many MLS store it as numeric)
-    if (streetNumber) {
-      filters.push(`startswith(StreetNumber, '${streetNumber}')`);
-    }
+      if (streetNumber) {
+        const streetNum = sanitizeODataValue(decodeURIComponent(streetNumber as string));
+        filters.push(`startswith(StreetNumber, '${streetNum}')`);
+      }
 
-    // 3) PostalCode / ZIP
-    if (zipParam) {
-      filters.push(`startswith(PostalCode, '${zipParam}')`);
-    }
+      if (zipParam) {
+        const zip = sanitizeODataValue(decodeURIComponent(zipParam as string));
+        filters.push(`startswith(PostalCode, '${zip}')`);
+      }
 
-    // 4) Full "address" search (safe: Spark allows startswith(), NOT contains)
-    if (address) {
-      const a = address;
-      filters.push(
-        `(startswith(StreetName, '${a}') or ` +
-        `startswith(cast(StreetNumber, 'Edm.String'), '${a}') or ` +
-        `startswith(StreetDirPrefix, '${a}') or ` +
-        `startswith(StreetSuffix, '${a}') or ` +
-        `startswith(UnparsedAddress, '${a}') or ` +
-        `startswith(PostalCode, '${a}'))`
-      );
-    }
+      if (address) {
+        const addr = sanitizeODataValue(decodeURIComponent(address as string));
+        filters.push(
+          `(startswith(StreetName, '${addr}') or ` +
+          `startswith(cast(StreetNumber, 'Edm.String'), '${addr}') or ` +
+          `startswith(StreetDirPrefix, '${addr}') or ` +
+          `startswith(StreetSuffix, '${addr}') or ` +
+          `startswith(UnparsedAddress, '${addr}') or ` +
+          `startswith(PostalCode, '${addr}'))`
+        );
+      }
 
       let url = baseUrl;
       if (filters.length > 0) {
@@ -197,16 +225,8 @@ if (sqftMin && sqftMax) {
       }
       
       if (data.value) {
-        
-        if (bedroomParam) {
-          const bedroomNum = parseInt(bedroomParam as string);
-          data.value = data.value.filter((item: any) => item.BedroomsTotal === bedroomNum);
-        }
-        
-        if (bathroomParam) {
-          const bathroomNum = parseInt(bathroomParam as string);
-          data.value = data.value.filter((item: any) => item.BathroomsTotalInteger === bathroomNum);
-        }
+        // Remove redundant client-side filtering since it's already handled in OData query
+        // The API already filters by bedrooms and bathrooms in the query construction above
       }
       
       ctx.body = data;

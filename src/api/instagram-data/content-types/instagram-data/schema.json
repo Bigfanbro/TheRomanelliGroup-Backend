@@ -11,17 +11,24 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "Description": {
+    "description": {
       "type": "text"
     },
-    "Timing": {
+    "views": {
       "type": "string"
     },
-    "ImageUrl": {
+    "reel_link": {
       "type": "string"
     },
-    "InstagramLinkUrl": {
-      "type": "string"
+    "thumbnail": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
     }
   }
 }

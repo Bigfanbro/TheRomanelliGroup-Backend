@@ -451,9 +451,7 @@ export interface ApiInstagramDataInstagramData
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    Description: Schema.Attribute.Text;
-    ImageUrl: Schema.Attribute.String;
-    InstagramLinkUrl: Schema.Attribute.String;
+    description: Schema.Attribute.Text;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -461,10 +459,12 @@ export interface ApiInstagramDataInstagramData
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
-    Timing: Schema.Attribute.String;
+    reel_link: Schema.Attribute.String;
+    thumbnail: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    views: Schema.Attribute.String;
   };
 }
 
