@@ -28,7 +28,7 @@ export default {
           system: "The Romanelli Group Website",
           type: "General Inquiry",
 
-          message: `
+        message: `
 Reason: ${reason || "N/A"}
 
 Message:
@@ -39,6 +39,9 @@ ${propertyAddress || "N/A"}
 
 Listing Key:
 ${listingKey || "N/A"}
+
+Property URL:
+${propertyUrl || "N/A"}
 `,
 
           tags: [
