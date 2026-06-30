@@ -1,5 +1,5 @@
-export default {
-  async submit(data: any) {
-    return data;
-  },
-};
+/**
+ * contact service
+ */
+
+export default () => ({});
