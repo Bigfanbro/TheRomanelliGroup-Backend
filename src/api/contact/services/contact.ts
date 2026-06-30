@@ -1,5 +1,1 @@
-/**
- * contact service
- */
-
-export default () => ({});
+export default {};
