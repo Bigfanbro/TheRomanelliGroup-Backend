@@ -10,4 +10,4 @@ export default {
   //     ctx.body = err;
   //   }
   // }
-};
+}; 
