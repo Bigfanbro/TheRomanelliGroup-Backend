@@ -1,13 +1,12 @@
 export default {
   routes: [
-    // {
-    //  method: 'GET',
-    //  path: '/contact',
-    //  handler: 'contact.exampleAction',
-    //  config: {
-    //    policies: [],
-    //    middlewares: [],
-    //  },
-    // },
+    {
+      method: "POST",
+      path: "/contact",
+      handler: "contact.submit",
+      config: {
+        auth: false,
+      },
+    },
   ],
 };
