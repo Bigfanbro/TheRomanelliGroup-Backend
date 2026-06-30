@@ -3,7 +3,16 @@ import { Context } from "koa";
 export default {
   async submit(ctx: Context) {
     try {
-      const { name, email, reason, message, source } = ctx.request.body as any;
+      const {
+        name,
+        email,
+        phone,
+        reason,
+        message,
+        source,
+        propertyAddress,
+        listingKey,
+      } = ctx.request.body as any;
 
       const response = await fetch("https://api.followupboss.com/v1/events", {
         method: "POST",
@@ -17,15 +26,44 @@ export default {
           source: source || "Website Contact Form",
           system: "The Romanelli Group Website",
           type: "General Inquiry",
-          message: `Reason: ${reason}\n\n${message}`,
+
+          message: `
+Reason: ${reason || "N/A"}
+
+Message:
+${message || "N/A"}
+
+Property:
+${propertyAddress || "N/A"}
+
+Listing Key:
+${listingKey || "N/A"}
+`,
+
+          tags: [
+            source || "Website",
+            reason || "General Inquiry",
+          ],
+
           person: {
             firstName: name?.split(" ")[0] || "",
             lastName: name?.split(" ").slice(1).join(" ") || "",
-            emails: [
-              {
-                value: email,
-              },
-            ],
+
+            emails: email
+              ? [
+                  {
+                    value: email,
+                  },
+                ]
+              : [],
+
+            phones: phone
+              ? [
+                  {
+                    value: phone,
+                  },
+                ]
+              : [],
           },
         }),
       });
