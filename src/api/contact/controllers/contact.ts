@@ -7,4 +7,4 @@ export default {
       message: "Contact endpoint is working!",
     };
   },
-};
+};  
