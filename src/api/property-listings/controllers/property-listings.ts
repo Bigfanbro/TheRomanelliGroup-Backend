@@ -237,6 +237,7 @@ export default {
       ctx.body = { error: "Failed to fetch from Spark API", details: err.message };
     }
   },
+
   async property(ctx: Context) {
     try {
       const { ListingKey } = ctx.query;
@@ -248,12 +249,15 @@ export default {
         };
         return;
       }
+      
+const filter = `ListingKey eq '${ListingKey}'`;
 
-      const url =
-        `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
-        `?$filter=ListingKey eq '${ListingKey}'` +
-        `&$expand=Media`;
+const url =
+  `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
+  `?$filter=${encodeURIComponent(filter)}` +
+  `&$expand=Media`;
 
+console.log("Property URL:", url);
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
