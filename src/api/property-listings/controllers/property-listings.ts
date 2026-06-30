@@ -50,9 +50,14 @@ export default {
         }
       });
 
-      if (!response.ok) {
-        throw new Error(`Spark API error ${response.status}`);
-      }
+     if (!response.ok) {
+  const errorText = await response.text();
+
+  console.error("Spark Response:");
+  console.error(errorText);
+
+  throw new Error(`Spark API error ${response.status}: ${errorText}`);
+}
 
       const data = await response.json();
       ctx.body = data;
