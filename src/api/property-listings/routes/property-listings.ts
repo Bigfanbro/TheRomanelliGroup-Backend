@@ -9,9 +9,17 @@ export default {
       },
     },
     {
-      method: "GET", 
+      method: "GET",
       path: "/property-listings/filter",
       handler: "property-listings.filter",
+      config: {
+        auth: false,
+      },
+    },
+    {
+      method: "GET",
+      path: "/property-listings/property",
+      handler: "property-listings.property",
       config: {
         auth: false,
       },
