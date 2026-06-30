@@ -237,4 +237,47 @@ export default {
       ctx.body = { error: "Failed to fetch from Spark API", details: err.message };
     }
   },
+  async property(ctx: Context) {
+    try {
+      const { ListingKey } = ctx.query;
+
+      if (!ListingKey) {
+        ctx.status = 400;
+        ctx.body = {
+          error: "ListingKey is required"
+        };
+        return;
+      }
+
+      const url =
+        `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
+        `?$filter=ListingKey eq '${ListingKey}'` +
+        `&$expand=Media`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
+          Accept: "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Spark API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      ctx.body = data;
+
+    } catch (err) {
+      console.error("❌ Property error:", err.message);
+
+      ctx.status = 500;
+      ctx.body = {
+        error: "Failed to fetch property",
+        details: err.message
+      };
+    }
+  },
 };
+
