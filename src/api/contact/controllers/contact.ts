@@ -4,15 +4,16 @@ export default {
   async submit(ctx: Context) {
     try {
       const {
-        name,
-        email,
-        phone,
-        reason,
-        message,
-        source,
-        propertyAddress,
-        listingKey,
-      } = ctx.request.body as any;
+  name,
+  email,
+  phone,
+  reason,
+  message,
+  source,
+  propertyAddress,
+  listingKey,
+  propertyUrl,
+} = ctx.request.body as any;
 
       const response = await fetch("https://api.followupboss.com/v1/events", {
         method: "POST",
