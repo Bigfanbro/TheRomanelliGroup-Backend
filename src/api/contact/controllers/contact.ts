@@ -1,10 +1,13 @@
-import { Context } from "koa";
+/**
+ * A set of functions called "actions" for `contact`
+ */
 
 export default {
-  async submit(ctx: Context) {
-    ctx.body = {
-      success: true,
-      message: "Contact endpoint is working!",
-    };
-  },
-};  
+  // exampleAction: async (ctx, next) => {
+  //   try {
+  //     ctx.body = 'ok';
+  //   } catch (err) {
+  //     ctx.body = err;
+  //   }
+  // }
+};
