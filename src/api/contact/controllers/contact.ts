@@ -15,25 +15,45 @@ export default {
         propertyUrl,
       } = ctx.request.body as any;
 
-      // Build the message sent to Follow Up Boss
+      // Build a clean message for Follow Up Boss
       let eventMessage = `
-INQUIRY TYPE
-${reason || "N/A"}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-----------------------------------------
+📋 INQUIRY DETAILS
 
-MESSAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-${message || "N/A"}
+Inquiry Type:
+${reason || "General Inquiry"}
+
+Message:
+${message || "No message provided"}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 CONTACT INFORMATION
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Name:
+${name || "N/A"}
+
+Email:
+${email || "N/A"}
+
+Phone:
+${phone || "N/A"}
 `;
 
-      // Only include property information for property inquiries
+      // Only append property information for property inquiries
       if (propertyAddress) {
         eventMessage += `
 
-----------------------------------------
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-PROPERTY DETAILS
+🏡 PROPERTY DETAILS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Address:
 ${propertyAddress}
@@ -60,14 +80,22 @@ ${propertyUrl || "N/A"}
           },
           body: JSON.stringify({
             source: source || "Website Contact Form",
+
             system: "The Romanelli Group Website",
-            type: "Website Inquiry",
+
+            type: propertyAddress
+              ? "Property Inquiry"
+              : "General Inquiry",
 
             message: eventMessage,
 
             tags: [
+              "Website",
               source || "Website",
-              reason || "Website Inquiry",
+
+              ...(reason ? [reason] : []),
+
+              ...(propertyAddress ? ["Property Inquiry"] : []),
             ],
 
             person: {
@@ -110,6 +138,7 @@ ${propertyUrl || "N/A"}
       console.error(err);
 
       ctx.status = 500;
+
       ctx.body = {
         success: false,
         error: err.message,
