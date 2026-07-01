@@ -13,6 +13,11 @@ export default {
         propertyAddress,
         listingKey,
         propertyUrl,
+        propertyPrice,
+        propertyStatus,
+        beds,
+        baths,
+        sqft,
       } = ctx.request.body as any;
 
       // Build a clean message for Follow Up Boss
@@ -58,6 +63,21 @@ ${phone || "N/A"}
 Address:
 ${propertyAddress}
 
+Price:
+${propertyPrice ? `$${Number(propertyPrice).toLocaleString()}` : "N/A"}
+
+Status:
+${propertyStatus || "N/A"}
+
+Bedrooms:
+${beds ?? "N/A"}
+
+Bathrooms:
+${baths ?? "N/A"}
+
+Square Feet:
+${sqft ? Number(sqft).toLocaleString() : "N/A"}
+
 Listing Key:
 ${listingKey || "N/A"}
 
@@ -92,9 +112,7 @@ ${propertyUrl || "N/A"}
             tags: [
               "Website",
               source || "Website",
-
               ...(reason ? [reason] : []),
-
               ...(propertyAddress ? ["Property Inquiry"] : []),
             ],
 
