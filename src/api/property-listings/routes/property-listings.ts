@@ -8,6 +8,16 @@ export default {
         auth: false,
       },
     },
+
+    {
+      method: "GET",
+      path: "/property-listings/featured",
+      handler: "property-listings.featured",
+      config: {
+        auth: false,
+      },
+    },
+
     {
       method: "GET",
       path: "/property-listings/filter",
@@ -16,6 +26,7 @@ export default {
         auth: false,
       },
     },
+
     {
       method: "GET",
       path: "/property-listings/property",
