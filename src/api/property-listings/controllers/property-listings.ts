@@ -2,127 +2,77 @@ import { Context } from "koa";
 
 export default {
  async listings(ctx: Context) {
-  try {
-    const isFeatured = ctx.query.featured === "true";
+    try {
+      const allowedLocations = [
+        "Westerville",
+        "Dublin",
+        "Powell",
+        "Gahanna",
+        "New Albany",
+        "Galena",
+        "Sunbury",
+        "Upper Arlington",
+        "Worthington",
+        "Bexley",
+        "Hilliard",
+        "Short North",
+        "German Village",
+        "Merion Village",
+        "Clintonville"
+      ];
 
-    const allowedLocations = [
-      "Westerville",
-      "Dublin",
-      "Powell",
-      "Gahanna",
-      "New Albany",
-      "Galena",
-      "Sunbury",
-      "Upper Arlington",
-      "Worthington",
-      "Bexley",
-      "Hilliard",
-      "Short North",
-      "German Village",
-      "Merion Village",
-      "Clintonville",
-    ];
+      const locationFilter = allowedLocations
+        .map(city => `City eq '${city}'`)
+        .join(" or ");
 
-    const locationFilter = allowedLocations
-      .map((city) => `City eq '${city}'`)
-      .join(" or ");
+      const propertyTypeFilter = [
+        "Residential",
+        "Residential Income",
+        "Land",
+        "Commercial Sale",
+        "Farm",
+        "Multi-Family"
+      ].map(type => `PropertyType eq '${type}'`).join(" or ");
 
-    const propertyTypeFilter = [
-      "Residential",
-      "Residential Income",
-      "Land",
-      "Commercial Sale",
-      "Farm",
-      "Multi-Family",
-    ]
-      .map((type) => `PropertyType eq '${type}'`)
-      .join(" or ");
+      const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
 
-    const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
+      const url =
+        `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
+        `?$filter=${encodeURIComponent(filter)}` +
+        `&$orderby=ModificationTimestamp desc` +
+        `&$top=30` +
+        `&$expand=Media`;
 
-    const url =
-      `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
-      `?$filter=${encodeURIComponent(filter)}` +
-      `&$orderby=ModificationTimestamp desc` +
-      `&$top=${isFeatured ? 8 : 30}` +
-      `&$expand=Media`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
+          Accept: "application/json"
+        }
+      });
 
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
-        Accept: "application/json",
-      },
-    });
+     if (!response.ok) {
+  const errorText = await response.text();
 
-    if (!response.ok) {
-      const errorText = await response.text();
+  console.error("Spark Response:");
+  console.error(errorText);
 
-      console.error("Spark Response:");
-      console.error(errorText);
+  throw new Error(`Spark API error ${response.status}: ${errorText}`);
+}
 
-      throw new Error(`Spark API error ${response.status}: ${errorText}`);
+      const data = await response.json();
+      ctx.body = data;
+
+    } catch (error) {
+      console.error("❌ Spark listings error:", error.message);
+      ctx.status = 500;
+      ctx.body = { error: "Failed to fetch listings" };
     }
+  },
 
-    const data = await response.json();
 
-    // Homepage Featured Listings
-    if (isFeatured) {
-      const featured = (data.value || [])
-        .filter(
-          (item: any) =>
-            item.ListPrice &&
-            item.ListPrice !== 1 &&
-            (item.UnparsedAddress || item.StreetNumber) &&
-            item.BedroomsTotal &&
-            item.BathroomsTotalInteger &&
-            item.BuildingAreaTotal
-        )
-        .slice(0, 6)
-        .map((item: any) => ({
-          ListingKey: item.ListingKey,
-          ListPrice: item.ListPrice,
-
-          Address:
-            item.UnparsedAddress ||
-            `${item.StreetNumber} ${item.StreetName}, ${item.City}, ${item.StateOrProvince}`,
-
-          BedroomsTotal: item.BedroomsTotal,
-
-          BathroomsTotalInteger: item.BathroomsTotalInteger,
-
-          BuildingAreaTotal: item.BuildingAreaTotal,
-
-          PublicRemarks: item.PublicRemarks,
-
-          MediaURL:
-            item.Media && item.Media.length > 0
-              ? item.Media[0].MediaURL
-              : null,
-        }));
-
-      ctx.body = {
-        value: featured,
-      };
-
-      return;
-    }
-
-    // Existing Buy Page Response
-    ctx.body = data;
-  } catch (error: any) {
-    console.error("❌ Spark listings error:", error.message);
-
-    ctx.status = 500;
-
-    ctx.body = {
-      error: "Failed to fetch listings",
-    };
-  }
-},
-
+  // features listing function
   async featured(ctx: Context) {
   try {
-
     const allowedLocations = [
       "Westerville",
       "Dublin",
@@ -162,7 +112,7 @@ export default {
       `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
       `?$filter=${encodeURIComponent(filter)}` +
       `&$orderby=ModificationTimestamp desc` +
-      `&$top=6` +
+      `&$top=8` +
       `&$expand=Media`;
 
     const response = await fetch(url, {
@@ -173,59 +123,26 @@ export default {
     });
 
     if (!response.ok) {
-      throw new Error(`Spark API ${response.status}`);
+      throw new Error(`Spark API error ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
 
-    const featured = (data.value || [])
-      .filter(
-        (item: any) =>
-          item.ListPrice &&
-          item.ListPrice !== 1 &&
-          (item.UnparsedAddress || item.StreetNumber) &&
-          item.BedroomsTotal &&
-          item.BathroomsTotalInteger &&
-          item.BuildingAreaTotal
-      )
-      .map((item: any) => ({
-        ListingKey: item.ListingKey,
-        ListPrice: item.ListPrice,
+    ctx.body = data;
 
-        Address:
-          item.UnparsedAddress ||
-          `${item.StreetNumber} ${item.StreetName}, ${item.City}, ${item.StateOrProvince}`,
+  } catch (error: any) {
 
-        BedroomsTotal: item.BedroomsTotal,
-
-        BathroomsTotalInteger: item.BathroomsTotalInteger,
-
-        BuildingAreaTotal: item.BuildingAreaTotal,
-
-        PublicRemarks: item.PublicRemarks,
-
-        MediaURL:
-          item.Media?.length > 0
-            ? item.Media[0].MediaURL
-            : null,
-      }));
-
-    ctx.body = {
-      value: featured,
-    };
-
-  } catch (err: any) {
-
-    console.error(err);
+    console.error("Featured listings error:", error.message);
 
     ctx.status = 500;
 
     ctx.body = {
-      error: "Unable to fetch featured listings",
+      error: "Failed to fetch featured listings",
     };
 
   }
 },
+
   async filter(ctx: Context) {
     try {
       // Validate API key
