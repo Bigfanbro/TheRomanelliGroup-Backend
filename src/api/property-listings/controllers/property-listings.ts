@@ -1,5 +1,8 @@
 import { Context } from "koa";
+let featuredCache: any[] | null = null;
+let featuredCacheTime = 0;
 
+const FEATURED_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 export default {
  async listings(ctx: Context) {
     try {
@@ -73,6 +76,20 @@ export default {
   // features listing function
   async featured(ctx: Context) {
   try {
+    const now = Date.now();
+
+if (
+  featuredCache &&
+  now - featuredCacheTime < FEATURED_CACHE_DURATION
+) {
+  console.log("✅ Returning featured listings from cache");
+
+  ctx.body = {
+    value: featuredCache,
+  };
+
+  return;
+}
     const allowedLocations = [
       "Westerville",
       "Dublin",
@@ -181,10 +198,17 @@ export default {
 
     );
 
-    // Return only six
-    ctx.body = {
-      value: diverseListings.slice(0, 12),
-    };
+    // Return only 12
+    const featuredListings = diverseListings.slice(0, 12);
+
+featuredCache = featuredListings;
+featuredCacheTime = Date.now();
+
+console.log("🔥 Cached featured listings");
+
+ctx.body = {
+  value: featuredListings,
+};
 
   } catch (error: any) {
 
