@@ -112,7 +112,7 @@ export default {
       `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
       `?$filter=${encodeURIComponent(filter)}` +
       `&$orderby=ModificationTimestamp desc` +
-      `&$top=8` +
+      `&$top=30` +
       `&$expand=Media`;
 
     const response = await fetch(url, {
@@ -128,7 +128,63 @@ export default {
 
     const data: any = await response.json();
 
-    ctx.body = data;
+    const listings = data.value || [];
+
+    // Quality Filter
+    const qualityListings = listings.filter((property: any) => {
+
+      return (
+
+        property.StandardStatus === "Active" &&
+
+        property.ListPrice &&
+        property.ListPrice > 1000 &&
+
+        property.Media &&
+        property.Media.length > 0 &&
+        property.Media[0]?.MediaURL &&
+
+        property.PublicRemarks &&
+        property.PublicRemarks.length > 80 &&
+
+        property.BedroomsTotal &&
+        property.BathroomsTotalInteger &&
+        property.BuildingAreaTotal &&
+
+        property.City &&
+        allowedLocations.includes(property.City)
+
+      );
+
+    });
+
+    // One listing per city
+    const seenCities = new Set();
+
+    const diverseListings = qualityListings.filter((property: any) => {
+
+      if (seenCities.has(property.City)) {
+        return false;
+      }
+
+      seenCities.add(property.City);
+
+      return true;
+
+    });
+
+    // Newest first
+    diverseListings.sort((a: any, b: any) =>
+
+      new Date(b.ModificationTimestamp).getTime() -
+      new Date(a.ModificationTimestamp).getTime()
+
+    );
+
+    // Return only six
+    ctx.body = {
+      value: diverseListings.slice(0, 6),
+    };
 
   } catch (error: any) {
 
