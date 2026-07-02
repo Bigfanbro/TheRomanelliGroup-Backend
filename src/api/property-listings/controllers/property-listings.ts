@@ -183,7 +183,7 @@ export default {
 
     // Return only six
     ctx.body = {
-      value: diverseListings.slice(0, 6),
+      value: diverseListings.slice(0, 12),
     };
 
   } catch (error: any) {
