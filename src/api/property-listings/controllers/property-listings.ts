@@ -358,6 +358,7 @@ ctx.body = {
     let url = baseUrl;
 
 if (filters.length > 0) {
+
   const filterString = filters.join(" and ");
 
   console.log("================================");
@@ -369,6 +370,7 @@ if (filters.length > 0) {
   console.log("Spark URL:");
   console.log(url);
   console.log("================================");
+
 }
 
 const response = await fetch(url, {
@@ -376,6 +378,22 @@ const response = await fetch(url, {
     Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
     Accept: "application/json",
   },
+});
+
+const data = await response.json();
+
+console.log("Returned Properties:", data.value?.length);
+
+data.value?.slice(0, 5).forEach((p: any, index: number) => {
+  console.log({
+    index: index + 1,
+    address: p.UnparsedAddress,
+    beds: p.BedroomsTotal,
+    fullBaths: p.BathroomsFull,
+    halfBaths: p.BathroomsHalf,
+    totalBathsInteger: p.BathroomsTotalInteger,
+    totalBathsDecimal: p.BathroomsTotalDecimal,
+  });
 });
       
 
