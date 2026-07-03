@@ -360,6 +360,8 @@ ctx.body = {
         const filterString = filters.join(' and ');
         url += `&$filter=${encodeURIComponent(filterString)}`;
       }
+      console.log("Spark Filter:", filters.join(" and "));
+console.log("Spark URL:", url);
       const response = await fetch(url, {
         headers: {
           "Authorization": `Bearer ${process.env.SPARK_API_KEY}`,
