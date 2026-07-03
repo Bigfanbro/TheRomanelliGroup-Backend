@@ -355,28 +355,28 @@ ctx.body = {
         );
       }
 
-     let url = baseUrl;
+    let url = baseUrl;
 
 if (filters.length > 0) {
-
   const filterString = filters.join(" and ");
 
-  console.log("========================");
-console.log("Spark Filter:");
-console.log(filterString);
+  console.log("================================");
+  console.log("Spark Filter:");
+  console.log(filterString);
 
-url += `&$filter=${encodeURIComponent(filterString)}`;
+  url += `&$filter=${encodeURIComponent(filterString)}`;
 
-console.log("Spark URL:");
-console.log(url);
-console.log("========================");
+  console.log("Spark URL:");
+  console.log(url);
+  console.log("================================");
+}
 
 const response = await fetch(url, {
-        headers: {
-          "Authorization": `Bearer ${process.env.SPARK_API_KEY}`,
-          "Accept": "application/json",
-        },
-      });
+  headers: {
+    Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
+    Accept: "application/json",
+  },
+});
       
 
       if (!response.ok) {
