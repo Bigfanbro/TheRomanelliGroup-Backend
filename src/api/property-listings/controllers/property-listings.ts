@@ -375,7 +375,7 @@ console.log("Spark URL:", url);
       }
 
       const data = await response.json() as any;
-      
+      console.log(data.value?.[0]);
       // Log sample locations to see what's available
       if (data.value?.length > 0) {
         const sampleLocations = data.value.slice(0, 5).map(item => ({
