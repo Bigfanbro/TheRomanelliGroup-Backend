@@ -326,7 +326,7 @@ ctx.body = {
         filters.push(`BedroomsTotal eq ${bedroomParam}`);
       }
       if (bathroomParam && /^\d+$/.test(bathroomParam as string)) {
-        filters.push(`BathroomsTotalInteger eq ${bathroomParam}`);
+      filters.push(`BathroomsFull eq ${bathroomParam}`);
       }
       if (street) {
         const streetName = sanitizeODataValue(decodeURIComponent(street as string));
