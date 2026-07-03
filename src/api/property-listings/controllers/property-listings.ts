@@ -361,18 +361,15 @@ if (filters.length > 0) {
 
   const filterString = filters.join(" and ");
 
-  console.log("Spark Filters:");
-  console.log(filters);
+  console.log("========================");
+console.log("Spark Filter:");
+console.log(filterString);
 
-  console.log("Filter String:");
-  console.log(filterString);
+url += `&$filter=${encodeURIComponent(filterString)}`;
 
-  url += `&$filter=${encodeURIComponent(filterString)}`;
-
-}
-
-console.log("Final Spark URL:");
+console.log("Spark URL:");
 console.log(url);
+console.log("========================");
 
 const response = await fetch(url, {
         headers: {
