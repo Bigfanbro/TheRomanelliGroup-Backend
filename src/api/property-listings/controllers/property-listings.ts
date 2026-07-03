@@ -326,8 +326,16 @@ ctx.body = {
         filters.push(`BedroomsTotal eq ${bedroomParam}`);
       }
       if (bathroomParam && /^\d+$/.test(bathroomParam as string)) {
-      filters.push(`BathroomsFull eq ${bathroomParam}`);
-      }
+  const bath = Number(bathroomParam);
+
+  if (bath >= 5) {
+    filters.push(`BathroomsTotalDecimal ge ${bath}`);
+  } else {
+    filters.push(
+      `(BathroomsTotalDecimal ge ${bath} and BathroomsTotalDecimal lt ${bath + 1})`
+    );
+  }
+}
       if (street) {
         const streetName = sanitizeODataValue(decodeURIComponent(street as string));
         filters.push(`startswith(StreetName, '${streetName}')`);
@@ -354,49 +362,29 @@ ctx.body = {
           `startswith(PostalCode, '${addr}'))`
         );
       }
-
-     let url = baseUrl;
+let url = baseUrl;
 
 if (filters.length > 0) {
-
   const filterString = filters.join(" and ");
-
-  console.log("Spark Filters:");
-  console.log(filters);
-
-  console.log("Filter String:");
-  console.log(filterString);
-
   url += `&$filter=${encodeURIComponent(filterString)}`;
-
 }
 
-console.log("Final Spark URL:");
-console.log(url);
-
 const response = await fetch(url, {
-        headers: {
-          "Authorization": `Bearer ${process.env.SPARK_API_KEY}`,
-          "Accept": "application/json",
-        },
-      });
-      
-
-      if (!response.ok) {
-        throw new Error(`Spark API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json() as any;
-     data.value?.slice(0, 10).forEach((p: any) => {
-  console.log(
-    p.UnparsedAddress,
-    "Beds:", p.BedroomsTotal,
-    "Full:", p.BathroomsFull,
-    "Half:", p.BathroomsHalf,
-    "Integer:", p.BathroomsTotalInteger,
-    "Decimal:", p.BathroomsTotalDecimal
-  );
+  headers: {
+    Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
+    Accept: "application/json",
+  },
 });
+
+if (!response.ok) {
+  throw new Error(
+    `Spark API error: ${response.status} ${response.statusText}`
+  );
+}
+
+const data = (await response.json()) as any;
+
+ctx.body = data;
       // Log sample locations to see what's available
       if (data.value?.length > 0) {
         const sampleLocations = data.value.slice(0, 5).map(item => ({
