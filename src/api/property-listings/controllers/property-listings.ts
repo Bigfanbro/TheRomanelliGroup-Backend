@@ -355,46 +355,31 @@ ctx.body = {
         );
       }
 
-    let url = baseUrl;
+     let url = baseUrl;
 
 if (filters.length > 0) {
 
   const filterString = filters.join(" and ");
 
-  console.log("================================");
-  console.log("Spark Filter:");
+  console.log("Spark Filters:");
+  console.log(filters);
+
+  console.log("Filter String:");
   console.log(filterString);
 
   url += `&$filter=${encodeURIComponent(filterString)}`;
 
-  console.log("Spark URL:");
-  console.log(url);
-  console.log("================================");
-
 }
 
+console.log("Final Spark URL:");
+console.log(url);
+
 const response = await fetch(url, {
-  headers: {
-    Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
-    Accept: "application/json",
-  },
-});
-
-const data = await response.json();
-
-console.log("Returned Properties:", data.value?.length);
-
-data.value?.slice(0, 5).forEach((p: any, index: number) => {
-  console.log({
-    index: index + 1,
-    address: p.UnparsedAddress,
-    beds: p.BedroomsTotal,
-    fullBaths: p.BathroomsFull,
-    halfBaths: p.BathroomsHalf,
-    totalBathsInteger: p.BathroomsTotalInteger,
-    totalBathsDecimal: p.BathroomsTotalDecimal,
-  });
-});
+        headers: {
+          "Authorization": `Bearer ${process.env.SPARK_API_KEY}`,
+          "Accept": "application/json",
+        },
+      });
       
 
       if (!response.ok) {
@@ -402,7 +387,16 @@ data.value?.slice(0, 5).forEach((p: any, index: number) => {
       }
 
       const data = await response.json() as any;
-      console.log(data.value?.[0]);
+     data.value?.slice(0, 10).forEach((p: any) => {
+  console.log(
+    p.UnparsedAddress,
+    "Beds:", p.BedroomsTotal,
+    "Full:", p.BathroomsFull,
+    "Half:", p.BathroomsHalf,
+    "Integer:", p.BathroomsTotalInteger,
+    "Decimal:", p.BathroomsTotalDecimal
+  );
+});
       // Log sample locations to see what's available
       if (data.value?.length > 0) {
         const sampleLocations = data.value.slice(0, 5).map(item => ({
