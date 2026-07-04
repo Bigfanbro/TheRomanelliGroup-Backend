@@ -113,12 +113,29 @@ if (
 
     const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
 
-    const url =
-      `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
-      `?$filter=${encodeURIComponent(filter)}` +
-      `&$orderby=ModificationTimestamp desc` +
-      `&$top=30` +
-      `&$expand=Media`;
+    const selectFields = [
+  "ListingKey",
+  "ListPrice",
+  "BedroomsTotal",
+  "BathroomsTotalInteger",
+  "BuildingAreaTotal",
+  "UnparsedAddress",
+  "StreetNumber",
+  "StreetName",
+  "City",
+  "StateOrProvince",
+  "StandardStatus",
+  "ModificationTimestamp",
+  "PublicRemarks"
+].join(",");
+
+const url =
+  `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
+  `?$select=${selectFields}` +
+  `&$filter=${encodeURIComponent(filter)}` +
+  `&$orderby=ModificationTimestamp desc` +
+  `&$top=30` +
+  `&$expand=Media`;
 
     const data: any = await strapi
   .service("api::property-listings.property-listings")
