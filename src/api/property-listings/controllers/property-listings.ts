@@ -412,8 +412,48 @@ const data = await strapi
     }
   },
    async related(ctx: Context) {
+  try {
+    const { ListingKey } = ctx.query;
+
+    if (!ListingKey) {
+      ctx.status = 400;
+      ctx.body = {
+        error: "ListingKey is required",
+      };
+      return;
+    }
+
+    // Fetch current property first
+    const currentFilter = `ListingKey eq '${ListingKey}'`;
+
+    const currentUrl =
+      `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
+      `?$filter=${encodeURIComponent(currentFilter)}`;
+
+    const currentData: any = await strapi
+      .service("api::property-listings.property-listings")
+      .sparkFetch(currentUrl);
+
+    const current = currentData.value?.[0];
+
+    if (!current) {
+      ctx.status = 404;
+      ctx.body = {
+        error: "Property not found",
+      };
+      return;
+    }
+
+    ctx.body = current;
+
+  } catch (err: any) {
+    console.error("❌ Related error:", err.message);
+
+    ctx.status = 500;
     ctx.body = {
-      message: "Related endpoint coming soon",
+      error: "Failed to fetch related properties",
+      details: err.message,
     };
-  },
+  }
+},
 };
