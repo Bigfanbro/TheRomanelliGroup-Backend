@@ -444,7 +444,29 @@ const data = await strapi
       return;
     }
 
-    ctx.body = current;
+    const minPrice = Math.round(current.ListPrice * 0.8);
+const maxPrice = Math.round(current.ListPrice * 1.2);
+
+const relatedFilter = [
+  `ListingKey ne '${current.ListingKey}'`,
+  `StandardStatus eq 'Active'`,
+  `City eq '${current.City}'`,
+  `PropertyType eq '${current.PropertyType}'`,
+  `ListPrice ge ${minPrice}`,
+  `ListPrice le ${maxPrice}`,
+].join(" and ");
+
+const relatedUrl =
+  `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
+  `?$filter=${encodeURIComponent(relatedFilter)}` +
+  `&$expand=Media` +
+  `&$top=6`;
+
+const relatedData: any = await strapi
+  .service("api::property-listings.property-listings")
+  .sparkFetch(relatedUrl);
+
+ctx.body = relatedData;
 
   } catch (err: any) {
     console.error("❌ Related error:", err.message);
