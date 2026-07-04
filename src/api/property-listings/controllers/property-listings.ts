@@ -146,6 +146,7 @@ const url =
     console.log("Office:", listings[0]?.ListOfficeName);
 console.log("Agent:", listings[0]?.ListAgentFullName);
 console.log("Last Name:", listings[0]?.ListAgentLastName);
+console.log("Office Name:", listings[0]?.ListOfficeName);
 
     // Quality Filter
     const qualityListings = listings.filter((property: any) => {
