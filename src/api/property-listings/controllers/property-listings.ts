@@ -441,5 +441,9 @@ const data = await strapi
       };
     }
   },
+   async related(ctx: Context) {
+    ctx.body = {
+      message: "Related endpoint coming soon",
+    };
+  },
 };
-
