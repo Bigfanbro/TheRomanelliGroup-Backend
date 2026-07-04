@@ -446,12 +446,16 @@ const data = await strapi
 
     const minPrice = Math.round(current.ListPrice * 0.8);
 const maxPrice = Math.round(current.ListPrice * 1.2);
+const minBedrooms = Math.max((current.BedroomsTotal || 1) - 1, 1);
+const maxBedrooms = (current.BedroomsTotal || 1) + 1;
 
 const relatedFilter = [
   `ListingKey ne '${current.ListingKey}'`,
   `StandardStatus eq 'Active'`,
   `City eq '${current.City}'`,
   `PropertyType eq '${current.PropertyType}'`,
+  `BedroomsTotal ge ${minBedrooms}`,
+  `BedroomsTotal le ${maxBedrooms}`,
   `ListPrice ge ${minPrice}`,
   `ListPrice le ${maxPrice}`,
 ].join(" and ");
@@ -466,7 +470,21 @@ const relatedData: any = await strapi
   .service("api::property-listings.property-listings")
   .sparkFetch(relatedUrl);
 
-ctx.body = relatedData;
+ctx.body = relatedData.value.map((item: any) => ({
+  ListingKey: item.ListingKey,
+  ListPrice: item.ListPrice,
+  BedroomsTotal: item.BedroomsTotal,
+  BathroomsTotalInteger: item.BathroomsTotalInteger,
+  BuildingAreaTotal: item.BuildingAreaTotal,
+  UnparsedAddress: item.UnparsedAddress,
+  City: item.City,
+  StateOrProvince: item.StateOrProvince,
+  StandardStatus: item.StandardStatus,
+  PropertyType: item.PropertyType,
+  PropertySubType: item.PropertySubType,
+  PhotosCount: item.PhotosCount,
+  Media: item.Media?.slice(0, 1),
+}));
 
   } catch (err: any) {
     console.error("❌ Related error:", err.message);
