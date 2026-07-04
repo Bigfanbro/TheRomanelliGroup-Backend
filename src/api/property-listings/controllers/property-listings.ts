@@ -46,21 +46,11 @@ export default {
         `&$top=30` +
         `&$expand=Media`;
 
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
-          Accept: "application/json"
-        }
-      });
+     const data = await strapi
+  .service("api::property-listings.property-listings")
+  .sparkFetch(url);
 
-     if (!response.ok) {
-  const errorText = await response.text();
-
- 
-  throw new Error(`Spark API error ${response.status}: ${errorText}`);
-}
-
-      const data = await response.json();
+ctx.body = data;
       ctx.body = data;
 
     } catch (error) {
@@ -358,20 +348,9 @@ if (filters.length > 0) {
   url += `&$filter=${encodeURIComponent(filterString)}`;
 }
 
-const response = await fetch(url, {
-  headers: {
-    Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
-    Accept: "application/json",
-  },
-});
-
-if (!response.ok) {
-  throw new Error(
-    `Spark API error: ${response.status} ${response.statusText}`
-  );
-}
-
-const data = (await response.json()) as any;
+const data: any = await strapi
+  .service("api::property-listings.property-listings")
+  .sparkFetch(url);
 
 ctx.body = data;
       // Log sample locations to see what's available
