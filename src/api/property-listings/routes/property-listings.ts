@@ -35,5 +35,15 @@ export default {
         auth: false,
       },
     },
+
+    // NEW ROUTE
+    {
+      method: "GET",
+      path: "/property-listings/related",
+      handler: "property-listings.related",
+      config: {
+        auth: false,
+      },
+    },
   ],
 };
