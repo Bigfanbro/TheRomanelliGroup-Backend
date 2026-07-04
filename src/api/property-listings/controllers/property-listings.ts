@@ -56,9 +56,7 @@ export default {
      if (!response.ok) {
   const errorText = await response.text();
 
-  console.error("Spark Response:");
-  console.error(errorText);
-
+ 
   throw new Error(`Spark API error ${response.status}: ${errorText}`);
 }
 
@@ -427,19 +425,9 @@ const url =
   `?$filter=${encodeURIComponent(filter)}` +
   `&$expand=Media`;
 
-console.log("Property URL:", url);
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
-          Accept: "application/json"
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Spark API error: ${response.status}`);
-      }
-
-      const data = await response.json();
+const data = await strapi
+  .service("api::property-listings.property-listings")
+  .sparkFetch(url);
 
       ctx.body = data;
 
