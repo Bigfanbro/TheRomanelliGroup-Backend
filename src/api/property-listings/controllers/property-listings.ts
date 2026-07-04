@@ -135,7 +135,7 @@ const url =
   `&$filter=${encodeURIComponent(filter)}` +
   `&$orderby=ModificationTimestamp desc` +
   `&$top=30` +
-  `&$expand=Media`;
+    `&$expand=Media($top=1)`;
 
     const data: any = await strapi
   .service("api::property-listings.property-listings")
@@ -380,8 +380,7 @@ ctx.body = data;
       }
       
       if (data.value) {
-        // Remove redundant client-side filtering since it's already handled in OData query
-        // The API already filters by bedrooms and bathrooms in the query construction above
+        
       }
       
       ctx.body = data;
