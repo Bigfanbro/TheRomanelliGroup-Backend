@@ -130,18 +130,9 @@ if (
       `&$top=30` +
       `&$expand=Media`;
 
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${process.env.SPARK_API_KEY}`,
-        Accept: "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Spark API error ${response.status}`);
-    }
-
-    const data: any = await response.json();
+    const data: any = await strapi
+  .service("api::property-listings.property-listings")
+  .sparkFetch(url);
 
     const listings = data.value || [];
 
