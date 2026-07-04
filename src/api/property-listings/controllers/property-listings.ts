@@ -142,9 +142,14 @@ const url =
   .sparkFetch(url);
 
     const listings = data.value || [];
+    console.log("Spark returned:", listings.length);
+    console.log("Office:", listings[0]?.ListOfficeName);
+console.log("Agent:", listings[0]?.ListAgentFullName);
+console.log("Last Name:", listings[0]?.ListAgentLastName);
 
     // Quality Filter
     const qualityListings = listings.filter((property: any) => {
+      
 
       return (
 
@@ -168,8 +173,10 @@ const url =
         allowedLocations.includes(property.City)
 
       );
+      
 
     });
+    
 
     // One listing per city
     const seenCities = new Set();
