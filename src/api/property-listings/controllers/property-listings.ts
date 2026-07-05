@@ -114,9 +114,10 @@ async featured(ctx: Context) {
 
     const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
 
-   const selectFields = [
+    const selectFields = [
   "ListingKey",
   "ListPrice",
+  "City",
   "BedroomsTotal",
   "BathroomsTotalInteger",
   "BuildingAreaTotal",
