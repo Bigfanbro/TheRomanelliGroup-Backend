@@ -110,23 +110,11 @@ if (
     ]
       .map(type => `PropertyType eq '${type}'`)
       .join(" or ");
+const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
 
-    const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
-    const romanelliFilter = `
-(
-  ListAgentLastName eq 'Romanelli'
-  or ListAgentLastName eq 'Rana'
-  or ListAgentLastName eq 'Sutton'
-  or ListAgentLastName eq 'Blake'
-)
-and
-(
-  ${locationFilter}
-)
-and
-(
-  ${propertyTypeFilter}
-)
+// Test: Fetch only Keller Williams Greater Cols listings
+const romanelliFilter = `
+ListOfficeName eq 'Keller Williams Greater Cols'
 `;
 
     const selectFields = [
@@ -191,7 +179,7 @@ console.log("Office Name:", listings[0]?.ListOfficeName);
 
       return (
 
-        property.StandardStatus === "Active" &&
+        property.StandardStatus?.startsWith("Active") &&
 
         property.ListPrice &&
         property.ListPrice > 1000 &&
