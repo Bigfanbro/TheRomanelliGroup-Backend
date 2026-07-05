@@ -24,16 +24,16 @@
         "audios"
       ]
     },
+    "Badge": {
+      "type": "string"
+    },
     "Location": {
       "type": "string"
     },
-    "Bidding": {
+    "SoldFor": {
       "type": "string"
     },
-    "Auction": {
-      "type": "string"
-    },
-    "Size": {
+    "SoldIn": {
       "type": "string"
     }
   }
