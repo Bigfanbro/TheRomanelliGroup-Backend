@@ -127,7 +127,7 @@ async featured(ctx: Context) {
       "StateOrProvince",
       "StandardStatus",
       "ModificationTimestamp",
-          ].join(",");
+          ].join(","); 
 
     const url =
       `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
