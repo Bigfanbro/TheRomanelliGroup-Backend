@@ -61,33 +61,23 @@ ctx.body = data;
   },
 
 
-  // features listing function
- // Featured Listings
-async featured(ctx: Context) {
+// features listing function
+  async featured(ctx: Context) {
   try {
     const now = Date.now();
 
-    if (
-      featuredCache &&
-      now - featuredCacheTime < FEATURED_CACHE_DURATION
-    ) {
-      console.log("✅ Returning featured listings from cache");
+if (
+  featuredCache &&
+  now - featuredCacheTime < FEATURED_CACHE_DURATION
+) {
+  console.log("✅ Returning featured listings from cache");
 
-      ctx.body = {
-        value: featuredCache,
-      };
+  ctx.body = {
+    value: featuredCache,
+  };
 
-      return;
-    }
-
-    const ROMANELLI_AGENTS = [
-      "Antonio Romanelli",
-      "Cristina Romanelli",
-      "Crystianna Rana",
-      "Miranda Sutton",
-      "Siobhan Blake",
-    ];
-
+  return;
+}
     const allowedLocations = [
       "Westerville",
       "Dublin",
@@ -107,7 +97,7 @@ async featured(ctx: Context) {
     ];
 
     const locationFilter = allowedLocations
-      .map((city) => `City eq '${city}'`)
+      .map(city => `City eq '${city}'`)
       .join(" or ");
 
     const propertyTypeFilter = [
@@ -118,127 +108,114 @@ async featured(ctx: Context) {
       "Farm",
       "Multi-Family",
     ]
-      .map((type) => `PropertyType eq '${type}'`)
+      .map(type => `PropertyType eq '${type}'`)
       .join(" or ");
 
     const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
 
     const selectFields = [
-      "ListingKey",
-      "ListPrice",
-      "BedroomsTotal",
-      "BathroomsTotalInteger",
-      "BuildingAreaTotal",
-      "UnparsedAddress",
-      "StreetNumber",
-      "StreetName",
-      "City",
-      "StateOrProvince",
-      "StandardStatus",
-      "ModificationTimestamp",
-      "PublicRemarks",
-      "ListOfficeName",
-      "ListAgentFirstName",
-      "ListAgentLastName",
-    ].join(",");
+  "ListingKey",
+  "ListPrice",
+  "BedroomsTotal",
+  "BathroomsTotalInteger",
+  "BuildingAreaTotal",
+  "UnparsedAddress",
+  "StreetNumber",
+  "StreetName",
+  "City",
+  "StateOrProvince",
+  "StandardStatus",
+  "ModificationTimestamp",
+  "PublicRemarks"
+].join(",");
 
-    const url =
-      `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
-      `?$select=${selectFields}` +
-      `&$filter=${encodeURIComponent(filter)}` +
-      `&$orderby=ModificationTimestamp desc` +
-      `&$top=50` +
-      `&$expand=Media`;
+const url =
+  `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
+  `?$select=${selectFields}` +
+  `&$filter=${encodeURIComponent(filter)}` +
+  `&$orderby=ModificationTimestamp desc` +
+  `&$top=30` +
+    `&$expand=Media($top=1)`;
 
     const data: any = await strapi
-      .service("api::property-listings.property-listings")
-      .sparkFetch(url);
+  .service("api::property-listings.property-listings")
+  .sparkFetch(url);
 
     const listings = data.value || [];
-    console.log("First Listing:");
-console.log(JSON.stringify(listings[0], null, 2));
+    console.log("Spark returned:", listings.length);
+    console.log("Office:", listings[0]?.ListOfficeName);
+console.log("Agent:", listings[0]?.ListAgentFullName);
+console.log("Last Name:", listings[0]?.ListAgentLastName);
+console.log("Office Name:", listings[0]?.ListOfficeName);
 
-    // Only active listings with at least one image
-    const qualityListings = listings.filter(
-      (property: any) =>
+    // Quality Filter
+    const qualityListings = listings.filter((property: any) => {
+      
+
+      return (
+
         property.StandardStatus === "Active" &&
-        property.Media?.length > 0 &&
-        property.Media[0]?.MediaURL
-    );
 
-    // Sort newest first
-    const sortNewest = (a: any, b: any) =>
+        property.ListPrice &&
+        property.ListPrice > 1000 &&
+
+        property.Media &&
+        property.Media.length > 0 &&
+        property.Media[0]?.MediaURL &&
+
+        property.PublicRemarks &&
+        property.PublicRemarks.length > 80 &&
+
+        property.BedroomsTotal &&
+        property.BathroomsTotalInteger &&
+        property.BuildingAreaTotal &&
+
+        property.City &&
+        allowedLocations.includes(property.City)
+
+      );
+      
+
+    });
+    
+
+    // One listing per city
+    const seenCities = new Set();
+
+    const diverseListings = qualityListings.filter((property: any) => {
+
+      if (seenCities.has(property.City)) {
+        return false;
+      }
+
+      seenCities.add(property.City);
+
+      return true;
+
+    });
+
+    // Newest first
+    diverseListings.sort((a: any, b: any) =>
+
       new Date(b.ModificationTimestamp).getTime() -
-      new Date(a.ModificationTimestamp).getTime();
+      new Date(a.ModificationTimestamp).getTime()
 
-    // Romanelli Team Listings
-    const romanelliListings = qualityListings
-      .filter((property: any) => {
-        const fullName =
-          `${property.ListAgentFirstName || ""} ${property.ListAgentLastName || ""}`.trim();
-
-        return ROMANELLI_AGENTS.includes(fullName);
-      })
-      .map((property: any) => ({
-        ...property,
-        badge: "The Romanelli Group Exclusive",
-      }))
-      .sort(sortNewest);
-
-    // Keller Williams Listings (excluding Romanelli team)
-    const kwListings = qualityListings
-      .filter((property: any) => {
-        const office =
-          property.ListOfficeName?.toLowerCase() || "";
-
-        const fullName =
-          `${property.ListAgentFirstName || ""} ${property.ListAgentLastName || ""}`.trim();
-
-        return (
-          office.includes("keller williams greater cols") &&
-          !ROMANELLI_AGENTS.includes(fullName)
-        );
-      })
-      .map((property: any) => ({
-        ...property,
-        badge: "Keller Williams Listing",
-      }))
-      .sort(sortNewest);
-
-    // Everyone else
-    const otherListings = qualityListings
-      .filter((property: any) => {
-        const office =
-          property.ListOfficeName?.toLowerCase() || "";
-
-        const fullName =
-          `${property.ListAgentFirstName || ""} ${property.ListAgentLastName || ""}`.trim();
-
-        return (
-          !office.includes("keller williams greater cols") &&
-          !ROMANELLI_AGENTS.includes(fullName)
-        );
-      })
-      .sort(sortNewest);
-
-    // Merge in priority order
-    const featuredListings = [
-      ...romanelliListings,
-      ...kwListings,
-      ...otherListings,
-    ].slice(0, 15);
-
-    featuredCache = featuredListings;
-    featuredCacheTime = Date.now();
-
-    console.log(
-      `⭐ Featured: ${romanelliListings.length} Romanelli | ${kwListings.length} KW | ${otherListings.length} Others`
     );
 
-    ctx.body = {
-      value: featuredListings,
-    };
+    // Return only 12
+    const featuredListings = diverseListings.slice(0, 12);
+
+featuredCache = featuredListings;
+featuredCacheTime = Date.now();
+
+console.log("🔥 Cached featured listings");
+
+ctx.body = {
+  value: featuredListings,
+};
+
   } catch (error: any) {
+
     console.error("Featured listings error:", error.message);
 
     ctx.status = 500;
@@ -246,6 +223,7 @@ console.log(JSON.stringify(listings[0], null, 2));
     ctx.body = {
       error: "Failed to fetch featured listings",
     };
+
   }
 },
 
