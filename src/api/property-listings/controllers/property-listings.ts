@@ -61,7 +61,8 @@ ctx.body = data;
   },
 
 
-  // Featured Listings
+  // features listing function
+ // Featured Listings
 async featured(ctx: Context) {
   try {
     const now = Date.now();
@@ -244,7 +245,7 @@ async featured(ctx: Context) {
       error: "Failed to fetch featured listings",
     };
   }
-}
+},
 
   async filter(ctx: Context) {
     try {
