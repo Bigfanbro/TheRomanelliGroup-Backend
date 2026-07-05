@@ -126,22 +126,35 @@ if (
   "StateOrProvince",
   "StandardStatus",
   "ModificationTimestamp",
-  "PublicRemarks"
+  "PublicRemarks",
+
+  "ListOfficeName",
+  "ListAgentFirstName",
+  "ListAgentLastName",
+
 ].join(",");
 
-const url =
-  `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
-  `?$select=${selectFields}` +
-  `&$filter=${encodeURIComponent(filter)}` +
-  `&$orderby=ModificationTimestamp desc` +
-  `&$top=30` +
-    `&$expand=Media($top=1)`;
+const fetchListings = async (
+  sparkFilter: string,
+  top: number = 30
+) => {
 
-    const data: any = await strapi
-  .service("api::property-listings.property-listings")
-  .sparkFetch(url);
+  const url =
+    `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
+    `?$select=${selectFields}` +
+    `&$filter=${encodeURIComponent(sparkFilter)}` +
+    `&$orderby=ModificationTimestamp desc` +
+    `&$top=${top}` +
+    `&$expand=Media`;
 
-    const listings = data.value || [];
+  const response: any = await strapi
+    .service("api::property-listings.property-listings")
+    .sparkFetch(url);
+
+  return response.value || [];
+};
+
+const listings = await fetchListings(filter, 30);
     console.log("Spark returned:", listings.length);
     console.log("Office:", listings[0]?.ListOfficeName);
 console.log("Agent:", listings[0]?.ListAgentFullName);
