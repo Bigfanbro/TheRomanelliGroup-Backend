@@ -440,7 +440,7 @@ const url =
   `&$expand=Media`;
 
 const data = await strapi
-  .service("api::property-listings.property-listings")
+  .service("api::property-listings.property-listings") 
   .sparkFetch(url);
 
       ctx.body = data;
