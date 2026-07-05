@@ -61,23 +61,24 @@ ctx.body = data;
   },
 
 
-// features listing function 
-  async featured(ctx: Context) {
+// Featured Listings
+async featured(ctx: Context) {
   try {
     const now = Date.now();
 
-if (
-  featuredCache &&
-  now - featuredCacheTime < FEATURED_CACHE_DURATION
-) {
-  console.log("✅ Returning featured listings from cache");
+    if (
+      featuredCache &&
+      now - featuredCacheTime < FEATURED_CACHE_DURATION
+    ) {
+      console.log("✅ Returning featured listings from cache");
 
-  ctx.body = {
-    value: featuredCache,
-  };
+      ctx.body = {
+        value: featuredCache,
+      };
 
-  return;
-}
+      return;
+    }
+
     const allowedLocations = [
       "Westerville",
       "Dublin",
@@ -97,7 +98,7 @@ if (
     ];
 
     const locationFilter = allowedLocations
-      .map(city => `City eq '${city}'`)
+      .map((city) => `City eq '${city}'`)
       .join(" or ");
 
     const propertyTypeFilter = [
@@ -108,139 +109,79 @@ if (
       "Farm",
       "Multi-Family",
     ]
-      .map(type => `PropertyType eq '${type}'`)
+      .map((type) => `PropertyType eq '${type}'`)
       .join(" or ");
-const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
 
-// Test: Fetch only Keller Williams Greater Cols listings
-const romanelliFilter = `
-ListOfficeName eq 'Keller Williams Greater Cols'
-`;
+    const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
 
     const selectFields = [
-  "ListingKey",
-  "ListPrice",
-  "BedroomsTotal",
-  "BathroomsTotalInteger",
-  "BuildingAreaTotal",
-  "UnparsedAddress",
-  "StreetNumber",
-  "StreetName",
-  "City",
-  "StateOrProvince",
-  "StandardStatus",
-  "ModificationTimestamp",
-  "PublicRemarks",
+      "ListingKey",
+      "ListPrice",
+      "BedroomsTotal",
+      "BathroomsTotalInteger",
+      "BuildingAreaTotal",
+      "UnparsedAddress",
+      "StreetNumber",
+      "StreetName",
+      "City",
+      "StateOrProvince",
+      "StandardStatus",
+      "ModificationTimestamp",
+      "PublicRemarks",
+      "ListOfficeName",
+      "ListAgentFirstName",
+      "ListAgentLastName",
+    ].join(",");
 
-  "ListOfficeName",
-  "ListAgentFirstName",
-  "ListAgentLastName",
+    const url =
+      `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
+      `?$select=${selectFields}` +
+      `&$filter=${encodeURIComponent(filter)}` +
+      `&$orderby=ModificationTimestamp desc` +
+      `&$top=50` +
+      `&$expand=Media($top=1)`;
 
-].join(",");
+    const data: any = await strapi
+      .service("api::property-listings.property-listings")
+      .sparkFetch(url);
 
-const ROMANELLI_AGENTS = [
-  "Antonio Romanelli",
-  "Cristina Romanelli",
-  "Crystianna Rano",
-  "Miranda Sutton",
-  "Siobhan Blake",
-];
-const fetchListings = async (
-  sparkFilter: string,
-  top: number = 30
-) => {
-  const url =
-    `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
-    `?$select=${selectFields}` +
-    `&$filter=${encodeURIComponent(sparkFilter)}` +
-    `&$orderby=ModificationTimestamp desc` +
-    `&$top=${top}` +
-    `&$expand=Media`;
+    const listings = data.value || [];
 
-  const response: any = await strapi
-    .service("api::property-listings.property-listings")
-    .sparkFetch(url);
-
-  return response.value || [];
-};
-
-const romanelliListings = await fetchListings(romanelliFilter, 20);
-
-const listings = await fetchListings(filter, 30);
     console.log("Spark returned:", listings.length);
-    console.log("Office:", listings[0]?.ListOfficeName);
-console.log("Agent:", listings[0]?.ListAgentFullName);
-console.log("Last Name:", listings[0]?.ListAgentLastName);
-console.log("Office Name:", listings[0]?.ListOfficeName);
 
-    // Quality Filter
-    const qualityListings = listings.filter((property: any) => {
-      
+    const featuredListings = listings
+      .filter((property: any) => {
+        return (
+          property.StandardStatus?.startsWith("Active") &&
 
-      return (
+          property.ListPrice &&
+          property.ListPrice > 1000 &&
 
-        property.StandardStatus?.startsWith("Active") &&
+          property.Media?.length > 0 &&
+          property.Media[0]?.MediaURL &&
 
-        property.ListPrice &&
-        property.ListPrice > 1000 &&
+          property.City &&
+          allowedLocations.includes(property.City)
+        );
+      })
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.ModificationTimestamp).getTime() -
+          new Date(a.ModificationTimestamp).getTime()
+      )
+      .slice(0, 15);
 
-        property.Media &&
-        property.Media.length > 0 &&
-        property.Media[0]?.MediaURL &&
+    featuredCache = featuredListings;
+    featuredCacheTime = Date.now();
 
-        property.PublicRemarks &&
-        property.PublicRemarks.length > 80 &&
-
-        property.BedroomsTotal &&
-        property.BathroomsTotalInteger &&
-        property.BuildingAreaTotal &&
-
-        property.City &&
-        allowedLocations.includes(property.City)
-
-      );
-      
-
-    });
-    
-
-    // One listing per city
-    const seenCities = new Set();
-
-    const diverseListings = qualityListings.filter((property: any) => {
-
-      if (seenCities.has(property.City)) {
-        return false;
-      }
-
-      seenCities.add(property.City);
-
-      return true;
-
-    });
-
-    // Newest first
-    diverseListings.sort((a: any, b: any) =>
-
-      new Date(b.ModificationTimestamp).getTime() -
-      new Date(a.ModificationTimestamp).getTime()
-
+    console.log(
+      `🔥 Cached ${featuredListings.length} featured listings`
     );
 
-    // Return only 12
-    const featuredListings = diverseListings.slice(0, 12);
-
-featuredCache = featuredListings;
-featuredCacheTime = Date.now();
-
-console.log("🔥 Cached featured listings");
-
-ctx.body = {
-  value: featuredListings,
-};
-
+    ctx.body = {
+      value: featuredListings,
+    };
   } catch (error: any) {
-
     console.error("Featured listings error:", error.message);
 
     ctx.status = 500;
@@ -248,10 +189,8 @@ ctx.body = {
     ctx.body = {
       error: "Failed to fetch featured listings",
     };
-
   }
 },
-
   async filter(ctx: Context) {
     try {
       // Validate API key
