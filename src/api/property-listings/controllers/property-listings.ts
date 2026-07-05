@@ -114,24 +114,16 @@ async featured(ctx: Context) {
 
     const filter = `(${locationFilter}) and (${propertyTypeFilter})`;
 
-    const selectFields = [
-      "ListingKey",
-      "ListPrice",
-      "BedroomsTotal",
-      "BathroomsTotalInteger",
-      "BuildingAreaTotal",
-      "UnparsedAddress",
-      "StreetNumber",
-      "StreetName",
-      "City",
-      "StateOrProvince",
-      "StandardStatus",
-      "ModificationTimestamp",
-      "PublicRemarks",
-      "ListOfficeName",
-      "ListAgentFirstName",
-      "ListAgentLastName",
-    ].join(",");
+   const selectFields = [
+  "ListingKey",
+  "ListPrice",
+  "BedroomsTotal",
+  "BathroomsTotalInteger",
+  "BuildingAreaTotal",
+  "UnparsedAddress",
+  "StandardStatus",
+  "ModificationTimestamp",
+].join(",");
 
     const url =
       `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
