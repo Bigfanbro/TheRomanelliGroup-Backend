@@ -150,10 +150,6 @@ and
 
 ].join(",");
 
-const fetchListings = async (
-  sparkFilter: string,
-  top: number = 30
-) => {
 const ROMANELLI_AGENTS = [
   "Antonio Romanelli",
   "Cristina Romanelli",
@@ -161,6 +157,10 @@ const ROMANELLI_AGENTS = [
   "Miranda Sutton",
   "Siobhan Blake",
 ];
+const fetchListings = async (
+  sparkFilter: string,
+  top: number = 30
+) => {
   const url =
     `https://replication.sparkapi.com/Version/3/Reso/OData/Property` +
     `?$select=${selectFields}` +
@@ -179,13 +179,12 @@ const ROMANELLI_AGENTS = [
 const romanelliListings = await fetchListings(romanelliFilter, 20);
 
 const listings = await fetchListings(filter, 30);
-    console.log(
-  "Romanelli Listings:",
-  romanelliListings.map(
-    (p: any) =>
-      `${p.ListAgentFirstName} ${p.ListAgentLastName} | ${p.ListOfficeName}`
-  )
-);
+    console.log("Spark returned:", listings.length);
+    console.log("Office:", listings[0]?.ListOfficeName);
+console.log("Agent:", listings[0]?.ListAgentFullName);
+console.log("Last Name:", listings[0]?.ListAgentLastName);
+console.log("Office Name:", listings[0]?.ListOfficeName);
+
     // Quality Filter
     const qualityListings = listings.filter((property: any) => {
       
