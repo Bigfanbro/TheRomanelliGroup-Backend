@@ -155,6 +155,8 @@ async featured(ctx: Context) {
       .sparkFetch(url);
 
     const listings = data.value || [];
+    console.log("First Listing:");
+console.log(JSON.stringify(listings[0], null, 2));
 
     // Only active listings with at least one image
     const qualityListings = listings.filter(
