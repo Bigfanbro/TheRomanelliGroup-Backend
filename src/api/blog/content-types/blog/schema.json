@@ -11,27 +11,79 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "Title": {
-      "type": "string"
+    "title": {
+      "type": "string",
+      "required": true
     },
-    "Image": {
+
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+
+    "image": {
       "type": "media",
       "multiple": false,
       "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ]
+        "images"
+      ],
+      "required": true
     },
-    "Description": {
-      "type": "text"
+
+    "excerpt": {
+      "type": "text",
+      "required": true
     },
-    "Read_Timing": {
+
+    "content": {
+      "type": "richtext"
+    },
+
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "Buyer",
+        "Seller",
+        "Market Updates",
+        "Neighborhood Guide",
+        "Financing",
+        "Investment",
+        "Home Maintenance",
+        "General"
+      ],
+      "default": "General",
+      "required": true
+    },
+
+    "tags": {
+      "type": "json"
+    },
+
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+
+    "readTime": {
+      "type": "integer",
+      "default": 5
+    },
+
+    "publishedDate": {
+      "type": "datetime"
+    },
+
+    "seoTitle": {
       "type": "string"
     },
-    "Post_Date": {
-      "type": "datetime"
+
+    "seoDescription": {
+      "type": "text"
+    },
+
+    "canonicalUrl": {
+      "type": "string"
     }
   }
 }
